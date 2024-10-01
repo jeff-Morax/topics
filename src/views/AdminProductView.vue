@@ -9,7 +9,7 @@
       <input v-model="quantity" placeholder="數量" type="number" />
 
       <!-- 文件選擇框和圖片預覽 -->
-      <input type="file" @change="onFileChange" />
+      <input type="file" ref="fileInput" @change="onFileChange" />
       <img v-if="imageUrl" :src="imageUrl" alt="選擇的圖片" />
 
       <!-- 更換圖片按鈕 -->
@@ -127,9 +127,8 @@ export default {
         await fetch(`http://localhost:4000/api/products/${id}`, {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
+            userid: user.userId,
           },
-          body: JSON.stringify({ userId: user.userId }),
         });
         this.fetchProducts();
       } catch (error) {

@@ -6,11 +6,13 @@
     <div class="nav-icons">
       <!-- 會員按鈕 -->
       <img
+        v-if="!loggedInUser"
         src="@/assets/button1.png"
         alt="Member"
         class="icon-btn"
-        @click="goToHome"
+        @click="goToLogin"
       />
+      <button v-if="loggedInUser" @click="logout">登出</button>
 
       <!-- 購物車按鈕 -->
       <img src="@/assets/button2.png" alt="Cart" class="icon-btn" />
@@ -31,9 +33,6 @@
             <li><a href="#">關於我們</a></li>
             <li><a href="#">常見問題</a></li>
             <li><a href="#">聯絡我們</a></li>
-            <br />
-            <button class="login-btn" @click="goToHome">會員登入</button>
-            <button class="register-btn">註冊新會員</button>
           </ul>
         </nav>
       </div>
@@ -47,7 +46,11 @@ export default {
     return {
       isMenuOpen: false,
       isDropdownOpen: false,
+      loggedInUser: null,
     };
+  },
+  mounted() {
+    this.loggedInUser = JSON.parse(localStorage.getItem("user"));
   },
   methods: {
     toggleMenu() {
@@ -59,8 +62,13 @@ export default {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
-    goToHome() {
-      this.$router.push({ name: "Memberlogin" }); // 使用路由名稱進行跳轉
+    goToLogin() {
+      this.$router.push({ name: "login" });
+    },
+    logout() {
+      localStorage.removeItem("user");
+      this.loggedInUser = null;
+      this.$router.push({ name: "home" });
     },
   },
 };
@@ -75,7 +83,7 @@ export default {
   background-color: #f8f8f8;
   position: relative;
   flex-direction: column; /* 預設垂直排列，確保在小螢幕下圖標在logo下方 */
-  z-index: 10; /* 設置 header 的 z-index */
+  z-index: 10;
 }
 
 .logo {
@@ -93,7 +101,7 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem; /* 默認在 logo 下方，桌面模式可根據需求調整 */
+  margin-top: 1rem;
 }
 
 .icon-btn {
@@ -111,7 +119,6 @@ export default {
   cursor: pointer;
 }
 
-/* 漢堡選單，確保 z-index 設置較大，讓它顯示在畫面最上層 */
 .dropdown-menu {
   position: absolute;
   right: 0;
@@ -120,8 +127,8 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   padding: 1rem;
   border-radius: 5px;
-  z-index: 10000; /* 設置較大的 z-index，確保選單顯示在最上層 */
-  width: 200px; /* 固定下拉選單的寬度 */
+  z-index: 10000;
+  width: 200px;
 }
 
 .dropdown-menu ul {
@@ -133,8 +140,6 @@ export default {
 
 .dropdown-menu li {
   padding: 0.5rem 0;
-  align-items: center; /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
 }
 
 .dropdown-menu a {
@@ -142,12 +147,6 @@ export default {
   color: #333;
   display: block;
   text-align: center;
-}
-
-/* 加入hover效果，當滑鼠懸停時背景變成草綠色 */
-.dropdown-menu li:hover {
-  background-color: #dfdfc5; /* 草綠色背景 */
-  color: white;
 }
 
 .sub-menu {
@@ -170,10 +169,9 @@ export default {
   background-color: #dfdfdf;
 }
 
-/* RWD 支援 */
 @media (min-width: 768px) {
   .header {
-    flex-direction: row; /* 在桌面上Logo和圖標水平排列 */
+    flex-direction: row;
   }
 
   .nav-icons {

@@ -6,7 +6,12 @@
     <h1>所有產品</h1>
     <div class="product-grid">
       <div v-for="product in products" :key="product.id" class="product-card">
-        <img :src="'/assets/' + product.image" alt="Product Image" />
+        <!-- 更新圖片路徑，指向後端的 /uploads 資料夾 -->
+        <img
+          v-if="product.image"
+          :src="'http://localhost:4000/uploads/' + product.image"
+          alt="Product Image"
+        />
         <h2>{{ product.product_name }}</h2>
         <p>{{ product.price }} 元</p>
         <button @click="viewProduct(product.id)">查看詳情</button>
@@ -26,7 +31,7 @@ export default {
   name: "ProductsView",
   components: {
     HeaderComponent,
-    FooterComponent, // 確保註冊 FooterComponent
+    FooterComponent,
   },
   data() {
     return {

@@ -1,11 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import MemberLoginView from "@/views/Memberloginview.vue"; // 登入頁
-import RegisterComponent from "@/views/RegisterComponent.vue"; // 註冊頁
-import ProductListView from "@/views/ProductListView.vue"; // 產品列表頁
-import ProductDetailView from "@/views/ProductDetailView.vue"; // 單一產品詳情頁
-import AdminProductView from "@/views/AdminProductView.vue"; // 後台產品管理頁
-import NotFound from "@/views/NotFound.vue"; // 404頁面
+import ProductsView from "@/views/ProductListView.vue";
+import AdminProductView from "@/views/AdminProductView.vue";
+import MemberLoginView from "@/views/Memberloginview.vue";
+import RegisterComponent from "@/views/RegisterView.vue"; // 確保註冊頁面的路由被引入
 
 const routes = [
   {
@@ -14,36 +12,25 @@ const routes = [
     component: HomeView,
   },
   {
+    path: "/products",
+    name: "products",
+    component: ProductsView,
+  },
+  {
+    path: "/admin/products",
+    name: "admin-products",
+    component: AdminProductView,
+    meta: { requiresAdmin: true },
+  },
+  {
     path: "/login",
-    name: "Memberlogin",
+    name: "login",
     component: MemberLoginView,
   },
   {
-    path: "/register",
-    name: "Register",
+    path: "/register", // 新增註冊路由
+    name: "register",
     component: RegisterComponent,
-  },
-  {
-    path: "/products", // 產品列表頁
-    name: "ProductList",
-    component: ProductListView,
-  },
-  {
-    path: "/products/:id", // 單一產品詳情頁，動態路由
-    name: "ProductDetail",
-    component: ProductDetailView,
-    props: true, // 允許 props 傳遞，方便在 ProductDetailView 中獲取產品 ID
-  },
-  {
-    path: "/admin/products", // 後台產品管理頁
-    name: "AdminProducts",
-    component: AdminProductView,
-    meta: { requiresAdmin: true }, // 需要管理員權限
-  },
-  {
-    path: "/:catchAll(.*)", // 404頁面
-    name: "NotFound",
-    component: NotFound,
   },
 ];
 
@@ -52,16 +39,17 @@ const router = createRouter({
   routes,
 });
 
-// 將在這裡添加導航守衛，檢查是否具有管理員權限
+// 導航守衛，檢查是否已登入
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = localStorage.getItem("user"); // 檢查是否登入
-  const user = isLoggedIn ? JSON.parse(isLoggedIn) : null;
+  const loggedInUser = JSON.parse(localStorage.getItem("user"));
 
-  // 如果路由需要管理員權限且當前用戶不是管理員，則重定向到登入頁面
-  if (to.meta.requiresAdmin && (!user || user.role !== "admin")) {
-    next({ name: "Memberlogin" });
+  if (
+    to.meta.requiresAdmin &&
+    (!loggedInUser || loggedInUser.role !== "admin")
+  ) {
+    next({ name: "login" });
   } else {
-    next(); // 否則繼續導航
+    next();
   }
 });
 
