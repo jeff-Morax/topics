@@ -15,7 +15,12 @@
       <button v-if="loggedInUser" @click="logout">登出</button>
 
       <!-- 購物車按鈕 -->
-      <img src="@/assets/button2.png" alt="Cart" class="icon-btn" />
+      <img
+        src="@/assets/button2.png"
+        alt="Cart"
+        class="icon-btn"
+        @click="goToCart"
+      />
 
       <!-- 漢堡選單 -->
       <div class="hamburger-menu">
@@ -69,6 +74,9 @@ export default {
       localStorage.removeItem("user");
       this.loggedInUser = null;
       this.$router.push({ name: "home" });
+    },
+    goToCart() {
+      this.$router.push({ name: "cart" });
     },
   },
 };

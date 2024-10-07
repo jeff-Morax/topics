@@ -37,14 +37,14 @@
 
       <!-- Google 登入按鈕 -->
       <div class="google-login">
-        <button class="google-btn" @click="loginWithGoogle">
-          <img
-            src="@/assets/google-icon.png"
-            alt="Google Icon"
-            class="google-icon"
-          />
-          使用 Google 登入
-        </button>
+        <div
+          id="g_id_onload"
+          data-client_id="578077334950-nqpm6kasi4m7nc80apuua603erfi3c2o.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse"
+          data-auto_select="false"
+          data-itp_support="true"
+        ></div>
+        <div class="g_id_signin" data-type="standard"></div>
       </div>
     </div>
     <FooterComponent />
@@ -97,67 +97,36 @@ export default {
         alert("登入錯誤，請稍後重試");
       }
     },
-    async loginWithGoogle() {
-      try {
-        const googleUser = await this.getGoogleToken();
-        const id_token = googleUser.getAuthResponse().id_token;
 
-        const response = await fetch("http://localhost:4000/api/google-login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token: id_token }),
-        });
+    // Google 身份驗證回應處理
+    handleCredentialResponse(response) {
+      console.log("Google 登入成功，ID Token:", response.credential);
 
-        if (response.ok) {
-          const data = await response.json();
+      fetch("http://localhost:4000/api/google-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: response.credential }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
           localStorage.setItem("user", JSON.stringify(data));
           if (data.role === "admin") {
             this.$router.push("/admin/products");
           } else {
             this.$router.push("/products");
           }
-        } else {
-          alert("Google 登入失敗");
-        }
-      } catch (error) {
-        if (error.error === "popup_closed_by_user") {
-          alert("Google 登入彈窗已被關閉，請再試一次");
-        } else {
+        })
+        .catch((error) => {
           console.error("Google 登入錯誤：", error);
           alert("Google 登入錯誤，請稍後重試");
-        }
-      }
-    },
-    getGoogleToken() {
-      return new Promise((resolve, reject) => {
-        if (window.gapi && window.gapi.auth2) {
-          window.gapi.auth2.getAuthInstance().signIn().then(resolve, reject);
-        } else {
-          reject(new Error("Google API 尚未加載"));
-        }
-      });
-    },
-
-    goToRegister() {
-      this.$router.push("/register"); // 導向註冊頁面
+        });
     },
   },
+
   mounted() {
-    if (!window.gapi) {
-      const script = document.createElement("script");
-      script.src = "https://apis.google.com/js/platform.js";
-      script.onload = () => {
-        window.gapi.load("auth2", () => {
-          window.gapi.auth2.init({
-            client_id:
-              "578077334950-nqpm6kasi4m7nc80apuua603erfi3c2o.apps.googleusercontent.com", // 正確的Google Client ID
-          });
-        });
-      };
-      document.head.appendChild(script);
-    }
+    window.handleCredentialResponse = this.handleCredentialResponse; // 設定全局回調函數
   },
 };
 </script>

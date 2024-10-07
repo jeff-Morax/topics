@@ -87,7 +87,7 @@ export default {
       formData.append("price", this.price);
       formData.append("quantity", this.quantity);
       if (this.image) {
-        formData.append("image", this.image); // 如果有圖片，則加入到表單中
+        formData.append("image", this.image); // 添加圖片到 FormData 中
       }
 
       const user = JSON.parse(localStorage.getItem("user"));
@@ -97,12 +97,12 @@ export default {
           method: "POST",
           body: formData,
           headers: {
-            userid: user.userId, // 傳遞 userId 在 headers 中
+            userid: user.userId, // 確保將 userId 添加到 headers 中
           },
         });
 
         if (response.ok) {
-          this.fetchProducts(); // 重新獲取產品列表
+          this.fetchProducts(); // 成功後重新獲取產品
           this.resetForm(); // 清空表單
         } else {
           console.error("新增產品失敗");
@@ -119,22 +119,32 @@ export default {
       this.quantity = 0;
       this.image = null;
       this.imageUrl = null;
+      this.$refs.fileInput.value = ""; // 重置文件選擇框
     },
     async deleteProduct(id) {
       const user = JSON.parse(localStorage.getItem("user"));
 
       try {
-        await fetch(`http://localhost:4000/api/products/${id}`, {
-          method: "DELETE",
-          headers: {
-            userid: user.userId,
-          },
-        });
-        this.fetchProducts();
+        const response = await fetch(
+          `http://localhost:4000/api/products/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              userid: user.userId, // 傳遞 userId 作為管理員身份驗證
+            },
+          }
+        );
+
+        if (response.ok) {
+          this.fetchProducts(); // 成功後重新載入產品列表
+        } else {
+          alert("無法刪除產品，請檢查您的權限");
+        }
       } catch (error) {
         console.error("無法刪除產品：", error);
       }
     },
+
     editProduct(product) {
       this.product_name = product.product_name;
       this.description = product.description;

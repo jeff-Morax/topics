@@ -1,24 +1,20 @@
 <template>
   <div id="home">
-    <!-- 引入並使用 HeaderComponent -->
     <HeaderComponent />
-
     <h1>所有產品</h1>
     <div class="product-grid">
       <div v-for="product in products" :key="product.id" class="product-card">
-        <!-- 更新圖片路徑，指向後端的 /uploads 資料夾 -->
         <img
           v-if="product.image"
           :src="'http://localhost:4000/uploads/' + product.image"
           alt="Product Image"
+          class="product-image"
         />
         <h2>{{ product.product_name }}</h2>
         <p>{{ product.price }} 元</p>
         <button @click="viewProduct(product.id)">查看詳情</button>
       </div>
     </div>
-
-    <!-- 引入並使用 FooterComponent -->
     <FooterComponent />
   </div>
 </template>
@@ -28,30 +24,29 @@ import HeaderComponent from "@/components/HeaderComponent.vue";
 import FooterComponent from "@/components/FooterComponent.vue";
 
 export default {
-  name: "ProductsView",
   components: {
     HeaderComponent,
     FooterComponent,
   },
   data() {
     return {
-      products: [], // 初始化產品數據
+      products: [],
     };
   },
   mounted() {
-    this.fetchProducts(); // 頁面掛載時請求產品資料
+    this.fetchProducts();
   },
   methods: {
     async fetchProducts() {
       try {
-        const response = await fetch("http://localhost:4000/api/products"); // 請求所有產品的 API
-        this.products = await response.json(); // 將 API 返回的產品資料賦值給 products
+        const response = await fetch("http://localhost:4000/api/products");
+        this.products = await response.json();
       } catch (error) {
-        console.error("無法獲取產品資料：", error); // 錯誤處理
+        console.error("無法獲取產品資料：", error);
       }
     },
     viewProduct(id) {
-      this.$router.push(`/product/${id}`); // 點擊 "查看詳情" 按鈕時導航到產品詳情頁
+      this.$router.push(`/product/${id}`); // 導向單個產品頁
     },
   },
 };
@@ -70,9 +65,9 @@ export default {
   width: 200px;
   text-align: center;
 }
-
-.product-card img {
-  max-width: 100%;
-  height: auto;
+.product-image {
+  max-width: 150px; /* 根據需要調整寬度 */
+  height: auto; /* 確保圖片比例正確 */
+  object-fit: cover; /* 確保圖片以適當的方式裁切 */
 }
 </style>
