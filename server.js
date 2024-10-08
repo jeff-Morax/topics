@@ -306,6 +306,67 @@ app.post("/api/cart", (req, res) => {
 app.use(cors());
 app.use(express.json());
 
+app.get("/api/cartItems", (req, res) => {
+  const userId = req.headers.userid;
+
+  const query = `
+    SELECT c.product_id, p.name, p.price, c.quantity
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    WHERE c.user_id = ?
+  `;
+
+  connection.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("無法獲取購物車內容：", err);
+      return res.status(500).send("無法獲取購物車內容");
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+// 取得使用者購物車資料的 API
+app.get("/api/cart/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  const query = `
+    SELECT products.id, products.product_name AS name, products.price, cart.quantity
+    FROM cart
+    JOIN products ON cart.product_id = products.id
+    WHERE cart.user_id = ?
+  `;
+
+  connection.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("無法獲取購物車資料:", err);
+      return res.status(500).json({ message: "購物車資料錯誤" });
+    }
+
+    // 確保回傳的是一個 JSON 格式
+    res.json(results);
+  });
+});
+
+// 刪除購物車中的品項 API
+app.delete("/api/cart/:userId/:productId", (req, res) => {
+  const { userId, productId } = req.params;
+
+  const query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+  connection.query(query, [userId, productId], (err, results) => {
+    if (err) {
+      console.error("移除購物車品項失敗:", err);
+      return res.status(500).send("移除購物車品項失敗");
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "購物車中無此品項" });
+    }
+
+    res.status(200).json({ message: "購物車品項已移除" });
+  });
+});
+
 const options = {
   OperationMode: "Test", // 測試環境，上線時改為 'Production'
   MercProfile: {

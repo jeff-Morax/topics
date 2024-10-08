@@ -35,11 +35,41 @@ const store = createStore({
     addProductToCart({ commit }, product) {
       commit("addToCart", product);
     },
-    removeProductFromCart({ commit }, productId) {
-      commit("removeFromCart", productId);
+    async removeProductFromCart({ commit, state }, productId) {
+      const userId = state.userId;
+
+      try {
+        // 呼叫後端 API，從購物車中移除品項
+        const response = await fetch(
+          `http://localhost:4000/api/cart/${userId}/${productId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          commit("removeFromCart", productId); // 如果移除成功，更新 Vuex 狀態
+        } else {
+          console.error("無法移除購物車品項");
+        }
+      } catch (error) {
+        console.error("移除購物車品項錯誤：", error);
+      }
     },
     clearCartItems({ commit }) {
       commit("clearCart");
+    },
+    fetchCartItems({ commit }, userId) {
+      fetch(`http://localhost:4000/api/cart/${userId}`)
+        .then((response) => response.json())
+        .then((cartItems) => {
+          cartItems.forEach((item) => {
+            commit("addToCart", item);
+          });
+        })
+        .catch((error) => {
+          console.error("無法獲取購物車資料:", error);
+        });
     },
   },
   getters: {

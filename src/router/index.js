@@ -4,6 +4,7 @@ import ProductsView from "@/views/ProductListView.vue";
 import AdminProductView from "@/views/AdminProductView.vue";
 import MemberLoginView from "@/views/Memberloginview.vue";
 import RegisterComponent from "@/views/RegisterView.vue"; // 確保註冊頁面的路由被引入
+import CartView from "@/views/CartView.vue";
 
 const routes = [
   {
@@ -42,10 +43,16 @@ const routes = [
     name: "cart",
     component: () => import("@/views/CartView.vue"),
   },
+  {
+    path: "/cart/:userId", // 定義購物車頁面的路由
+    name: "cart",
+    component: CartView, // 導入你的購物車頁面
+    props: true, // 允許將 userId 作為 props 傳遞給 CartView
+  },
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes,
 });
 

@@ -17,6 +17,7 @@
 
 <script>
 export default {
+  props: ["userId"], // 接收從路由傳來的 userId
   computed: {
     cartItems() {
       return this.$store.getters.cartItems;
@@ -25,12 +26,15 @@ export default {
       return this.$store.getters.cartTotal;
     },
   },
+  mounted() {
+    // 在元件掛載後根據 userId 獲取購物車資料
+    this.$store.dispatch("fetchCartItems", this.userId);
+  },
   methods: {
     removeFromCart(productId) {
       this.$store.dispatch("removeProductFromCart", productId);
     },
     checkout() {
-      // 進行結帳邏輯，例如跳轉到綠界支付頁面
       console.log("前往結帳");
     },
   },

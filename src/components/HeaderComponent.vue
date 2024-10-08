@@ -76,7 +76,8 @@ export default {
       this.$router.push({ name: "home" });
     },
     goToCart() {
-      this.$router.push({ name: "cart" });
+      const user = JSON.parse(localStorage.getItem("user"));
+      this.$router.push({ name: "cart", params: { userId: user.userId } });
     },
   },
 };
